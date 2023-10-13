@@ -13,5 +13,5 @@ plugins {
 }
 
 includeBuild("gradle/plugins")
-//include("server")
-//include("client")
+include("server")
+include("client")
