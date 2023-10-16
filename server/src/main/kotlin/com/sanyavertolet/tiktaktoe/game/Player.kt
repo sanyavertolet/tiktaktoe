@@ -1,7 +1,6 @@
 package com.sanyavertolet.tiktaktoe.game
 
-import com.sanyavertolet.tiktaktoe.multiplayer.Notification
-import com.sanyavertolet.tiktaktoe.multiplayer.Request
+import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.multiplayer.User
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -13,13 +12,12 @@ class Player<O : Any>(
     val name: String
         get() = user.name
 
+    val origin: O
+        get() = user.origin
+
     private suspend fun sendMessage(message: String) = user.sendMessage(message)
 
-    suspend fun waitForTurn() = user.waitForResponse()
-
-    suspend fun sendNotification(
-        notification: Notification,
-    ) = sendMessage(Json.encodeToString(notification))
+    suspend fun sendNotification(notification: Notifications) = sendMessage(Json.encodeToString(notification))
 }
 
 enum class PlayerType {

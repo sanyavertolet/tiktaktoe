@@ -1,6 +1,6 @@
 package com.sanyavertolet.tiktaktoe.game
 
-import com.sanyavertolet.tiktaktoe.multiplayer.Notification
+import com.sanyavertolet.tiktaktoe.messages.Notifications
 import java.util.concurrent.atomic.AtomicInteger
 
 typealias Result = Pair<Boolean, PlayerType>
@@ -15,42 +15,33 @@ class TikTakToeGame(
 
     private fun whoWins(): Result = field.whoWins()
 
-    private fun turn(position: Position) {
-        field[position] = currentTurnPlayer
-    }
-
     private suspend fun notifyBegin() {
-        val gameStarted = Notification.GameStarted(players.first().name)
+        val gameStarted: Notifications = Notifications.GameStarted(players.first().name)
         players.forEach { it.sendNotification(gameStarted) }
     }
 
-    private suspend fun notifyEnd(winner: Player<*>?) {
-        val gameFinished = Notification.GameFinished(winner?.name)
+    suspend fun notifyEnd(winner: Player<*>?) {
+        val gameFinished = Notifications.GameFinished(winner?.name)
         players.forEach { it.sendNotification(gameFinished) }
     }
 
-    private suspend fun askForTurn(position: Position?): Position {
-        val turnNotification = Notification.Turn(position)
-        currentTurnPlayer.sendNotification(turnNotification)
-        return currentTurnPlayer.waitForTurn().position
-    }
-
-    private val currentTurnPlayer: Player<*>
-        get() = players[whoseTurn.get()]
-
-    suspend fun run() {
-        notifyBegin()
-        whoseTurn.set(0)
-        var previousPosition: Position? = null
-        while (true) {
-            val position = askForTurn(previousPosition)
-            turn(position).also { whoseTurn.incrementAndGet() }
-            val (isFinished, winner) = whoWins()
-            if (isFinished) {
-                notifyEnd(players.find { it.type == winner })
-                return
-            }
-            previousPosition = position
+    suspend fun turn(position: Position): Position? {
+        field[position] = currentTurnPlayer
+        val (isFinished, winner) = whoWins()
+        return if (isFinished) {
+            notifyEnd(players.find { it.type == winner })
+            null
+        } else {
+            whoseTurn.incrementAndGet()
+            position
         }
     }
+
+    val currentTurnPlayer: Player<*>
+        get() = players[whoseTurn.get() % 2]
+
+    val previousTurnPlayer: Player<*>
+        get() = players[(whoseTurn.get() - 1) % 2]
+
+    suspend fun run() = notifyBegin().also { whoseTurn.set(0) }
 }
