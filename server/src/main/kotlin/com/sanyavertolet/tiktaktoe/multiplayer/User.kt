@@ -1,6 +1,6 @@
 package com.sanyavertolet.tiktaktoe.multiplayer
 
-import com.sanyavertolet.tiktaktoe.multiplayer.messages.Requests
+import com.sanyavertolet.tiktaktoe.messages.Requests
 
 abstract class User<O : Any>(
     val name: String,

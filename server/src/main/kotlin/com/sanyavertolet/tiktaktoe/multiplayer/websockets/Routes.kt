@@ -2,8 +2,8 @@ package com.sanyavertolet.tiktaktoe.multiplayer.websockets
 
 import com.sanyavertolet.tiktaktoe.game.TikTakToeGame
 import com.sanyavertolet.tiktaktoe.messages.Notifications
+import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.multiplayer.Lobby
-import com.sanyavertolet.tiktaktoe.multiplayer.messages.Requests
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
@@ -28,8 +28,7 @@ fun Routing.gameRoute() = webSocket("/game") {
                 }
 
                 is Requests.StartGame -> {
-                    val lobby =
-                        Lobby.lobbies.find { it.host.origin == this } ?: error("Forbidden to create such a lobby.")
+                    val lobby = Lobby.lobbies.find { it.host.origin == this } ?: error("Forbidden to create such a lobby.")
                     games[lobby.lobbyCode] = lobby.createGame().also { it.run() }
                 }
 
@@ -52,4 +51,4 @@ fun Routing.gameRoute() = webSocket("/game") {
     }
 }
 
-val games: ConcurrentHashMap<Int, TikTakToeGame> = ConcurrentHashMap()
+val games: ConcurrentHashMap<String, TikTakToeGame> = ConcurrentHashMap()

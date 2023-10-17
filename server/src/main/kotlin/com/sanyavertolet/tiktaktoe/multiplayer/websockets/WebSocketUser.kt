@@ -1,7 +1,7 @@
 package com.sanyavertolet.tiktaktoe.multiplayer.websockets
 
+import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.multiplayer.User
-import com.sanyavertolet.tiktaktoe.multiplayer.messages.Requests
 import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
 

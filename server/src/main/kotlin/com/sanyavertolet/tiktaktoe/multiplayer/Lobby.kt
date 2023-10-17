@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class Lobby<O : Any> (
     val host: User<O>,
-    val lobbyCode: Int = lobbyCounter.incrementAndGet(),
+    val lobbyCode: String = lobbyCounter.incrementAndGet().toString(),
 ) {
     private var anotherUser: User<O>? = null
     private var boardSize: Int = 3
