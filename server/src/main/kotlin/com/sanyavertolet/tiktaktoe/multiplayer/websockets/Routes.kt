@@ -27,6 +27,11 @@ fun Routing.gameRoute() = webSocket("/game") {
                     Lobby.lobbies.find { it.lobbyCode == request.lobbyCode }?.connectUser(user)
                 }
 
+                is Requests.LeaveLobby -> {
+                    val lobby = Lobby.lobbies.find { it.lobbyCode == request.lobbyCode }
+                    lobby?.disconnectUser(request.userName, this)
+                }
+
                 is Requests.StartGame -> {
                     val lobby = Lobby.lobbies.find { it.host.origin == this } ?: error("Forbidden to create such a lobby.")
                     games[lobby.lobbyCode] = lobby.createGame().also { it.run() }

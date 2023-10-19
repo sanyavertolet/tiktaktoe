@@ -4,6 +4,7 @@ import com.sanyavertolet.tiktaktoe.exceptions.LobbyException
 import com.sanyavertolet.tiktaktoe.game.Player
 import com.sanyavertolet.tiktaktoe.game.PlayerType
 import com.sanyavertolet.tiktaktoe.game.TikTakToeGame
+import com.sanyavertolet.tiktaktoe.messages.Notifications
 import io.ktor.websocket.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -25,6 +26,16 @@ class Lobby<O : Any> (
 
     fun connectUser(user: User<O>) {
         anotherUser = user
+    }
+
+    suspend fun disconnectUser(userName: String, origin: O) {
+        if (host.name == userName && host.origin == origin) {
+            close("Host has left")
+        } else if (anotherUser?.name == userName && anotherUser?.origin == origin) {
+            anotherUser = null
+            val notification: Notifications = Notifications.PlayerLeft
+            host.sendNotification(notification)
+        }
     }
 
     suspend fun close(disconnectReason: String = DEFAULT_DISCONNECT_MESSAGE) {

@@ -23,6 +23,9 @@ sealed class Requests {
     data class JoinLobby(val userName: String, val lobbyCode: String) : Requests()
 
     @Serializable
+    data class LeaveLobby(val userName: String, val lobbyCode: String) : Requests()
+
+    @Serializable
     @SerialName("turn")
     data class Turn(val position: Position, val lobbyCode: String) : Requests()
 }

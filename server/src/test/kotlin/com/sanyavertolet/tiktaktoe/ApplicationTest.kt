@@ -1,7 +1,7 @@
 package com.sanyavertolet.tiktaktoe
 
 import com.sanyavertolet.tiktaktoe.messages.Notifications
-import com.sanyavertolet.tiktaktoe.multiplayer.messages.Requests
+import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.plugins.configureRouting
 import com.sanyavertolet.tiktaktoe.plugins.configureSockets
 import io.ktor.client.plugins.websocket.*
@@ -37,9 +37,9 @@ class ApplicationTest {
                 install(WebSockets) { contentConverter = KotlinxWebsocketSerializationConverter(Json) }
             }
                 .ws("/game") {
-                    val createRequest: Requests = Requests.CreateLobby("user1", 1)
+                    val createRequest: Requests = Requests.CreateLobby("user1", 1.toString())
                     sendSerialized(createRequest)
-                    val startRequest: Requests = Requests.StartGame(1)
+                    val startRequest: Requests = Requests.StartGame(1.toString())
                     sendSerialized(startRequest)
                     val text = (incoming.receive() as Frame.Text).readText()
                     notification.complete(text.let { Json.decodeFromString(it) })
@@ -55,7 +55,7 @@ class ApplicationTest {
                 }
             }
                 .ws("/game") {
-                    val request: Requests = Requests.JoinLobby("user2", 1)
+                    val request: Requests = Requests.JoinLobby("user2", 1.toString())
                     sendSerialized(request)
                     val text = (incoming.receive() as Frame.Text).readText()
                     notification.complete(text.let { Json.decodeFromString(it) })

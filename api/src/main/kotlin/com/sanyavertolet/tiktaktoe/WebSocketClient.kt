@@ -46,6 +46,12 @@ suspend fun ClientWebSocketSession.processIncoming() {
             is Notifications.GameStarted -> {
                 TODO("Render field")
             }
+            is Notifications.PlayerJoined -> {
+                TODO("Add player to lobby")
+            }
+            is Notifications.PlayerLeft -> {
+                TODO("Remove player from lobby")
+            }
             is Notifications.GameFinished -> {
                 TODO("Show game winner")
             }

@@ -12,5 +12,11 @@ sealed class Notifications {
     data class GameFinished(val whoWinsUserName: String?) : Notifications()
 
     @Serializable
+    data class PlayerJoined(val userName: String) : Notifications()
+
+    @Serializable
+    data object PlayerLeft : Notifications()
+
+    @Serializable
     data class Turn(val opponentPosition: Position?) : Notifications()
 }
