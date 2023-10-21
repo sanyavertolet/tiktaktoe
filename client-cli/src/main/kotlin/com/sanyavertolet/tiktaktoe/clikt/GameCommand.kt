@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.jakewharton.mosaic.runMosaic
+import com.sanyavertolet.tiktaktoe.Client
 import com.sanyavertolet.tiktaktoe.WebSocketClient
 import com.sanyavertolet.tiktaktoe.game.Position
 import com.sanyavertolet.tiktaktoe.messages.Notifications
@@ -33,7 +34,7 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
     abstract val fieldSize: Int
     abstract val winCondition: Int
     private val gameScope = CoroutineScope(Dispatchers.Default)
-    private val webSocketClient = WebSocketClient()
+    private val client: Client = WebSocketClient()
 
     private var isMyTurn: Boolean = false
     private lateinit var myMarker: Marker
@@ -45,7 +46,7 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
 
     protected abstract fun getInitRequest(): Requests
 
-    private suspend fun initializeConnection() = webSocketClient.startSessionAndRequest(url, ::onNotificationReceived, ::getInitRequest)
+    private suspend fun initializeConnection() = client.startSessionAndRequest(url, ::onNotificationReceived, ::getInitRequest)
 
     override fun run() {
         processConnection()
@@ -76,7 +77,7 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
             println(getLobbyMessage())
         } else {
             println("To start a game, press \"g\" button...")
-            webSocketClient.sendRequest(Requests.StartGame(lobbyCode))
+            client.sendRequest(Requests.StartGame(lobbyCode))
         }
     }
 
@@ -126,6 +127,6 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
     }
 
     protected open suspend fun sendTurnRequest(position: Position) {
-        webSocketClient.sendRequest(Requests.Turn(position, lobbyCode))
+        client.sendRequest(Requests.Turn(position, lobbyCode))
     }
 }

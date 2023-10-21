@@ -14,15 +14,15 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) {
+class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) : Client {
     private val scope = CoroutineScope(Dispatchers.Default)
     private val client = HttpClient(engine) {
         install(WebSockets) { contentConverter = KotlinxWebsocketSerializationConverter(Json) }
     }
     private val messageQueue = Channel<Requests>()
 
-    suspend fun startSessionAndRequest(
-        url: String = "/game",
+    override suspend fun startSessionAndRequest(
+        url: String,
         onNotificationReceived: (Notifications) -> Unit,
         andAction: () -> Requests,
     ) {
@@ -53,5 +53,7 @@ class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) {
         }
     }
 
-    fun sendRequest(requests: Requests) = scope.launch { messageQueue.send(requests) }
+    override fun sendRequest(request: Requests) {
+        scope.launch { messageQueue.send(request) }
+    }
 }
