@@ -11,7 +11,8 @@ sealed class Requests {
     data class CreateLobby(
         val userName: String,
         val lobbyCode: String? = null,
-        val settings: Pair<Int, Int> = 3 to 3,
+        val fieldSize: Int = 3,
+        val winCondition: Int = 3,
     ) : Requests()
 
     @Serializable

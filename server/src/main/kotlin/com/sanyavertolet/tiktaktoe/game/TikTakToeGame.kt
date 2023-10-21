@@ -7,23 +7,17 @@ typealias Result = Pair<Boolean, PlayerType>
 
 class TikTakToeGame(
     private val players: List<Player<*>>,
-    boardSize: Int = 3,
-    rowWinCount: Int = 3,
+    boardSize: Int,
+    rowWinCount: Int,
 ) {
     private val field: Field = Field(boardSize, rowWinCount)
     private val whoseTurn = AtomicInteger(0)
 
     private fun whoWins(): Result = field.whoWins()
 
-    private suspend fun notifyBegin() {
-        val gameStarted: Notifications = Notifications.GameStarted(players.first().name)
-        players.forEach { it.sendNotification(gameStarted) }
-    }
+    private suspend fun notifyBegin() = sendAll(Notifications.GameStarted(currentTurnPlayer.name))
 
-    suspend fun notifyEnd(winner: Player<*>?) {
-        val gameFinished = Notifications.GameFinished(winner?.name)
-        players.forEach { it.sendNotification(gameFinished) }
-    }
+    suspend fun notifyEnd(winner: Player<*>?) = sendAll(Notifications.GameFinished(winner?.name))
 
     suspend fun turn(position: Position): Position? {
         field[position] = currentTurnPlayer
@@ -41,7 +35,11 @@ class TikTakToeGame(
         get() = players[whoseTurn.get() % 2]
 
     val previousTurnPlayer: Player<*>
-        get() = players[(whoseTurn.get() - 1) % 2]
+        get() = players[(whoseTurn.get() + 1) % 2]
+
+    suspend fun sendAll(notification: Notifications) {
+        players.forEach { it.sendNotification(notification) }
+    }
 
     suspend fun run() = notifyBegin().also { whoseTurn.set(0) }
 }

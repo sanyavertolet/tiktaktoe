@@ -1,6 +1,5 @@
 package com.sanyavertolet.tiktaktoe.utils
 
-import com.sanyavertolet.tiktaktoe.World
 import com.sanyavertolet.tiktaktoe.game.Position
 
 enum class Direction {
@@ -10,14 +9,14 @@ enum class Direction {
     BOTTOM,
 }
 
-fun Position.move(direction: Direction) = when (direction) {
-    Direction.LEFT -> -2 to 0
-    Direction.TOP -> 0 to -2
-    Direction.RIGHT -> 2 to 0
-    Direction.BOTTOM -> 0 to 2
+fun Position.move(direction: Direction, fieldSize: Int) = when (direction) {
+    Direction.LEFT -> -1 to 0
+    Direction.TOP -> 0 to -1
+    Direction.RIGHT -> 1 to 0
+    Direction.BOTTOM -> 0 to 1
 }.let { (deltaX, deltaY) ->
     Position(
-        (x + deltaX).coerceIn(1, 2 * World.fieldSize - 1),
-        (y + deltaY).coerceIn(1, 2 * World.fieldSize - 1),
+        (x + deltaX).coerceIn(0, fieldSize - 1),
+        (y + deltaY).coerceIn(0, fieldSize - 1),
     )
 }

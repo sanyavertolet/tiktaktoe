@@ -13,6 +13,7 @@ ktor = "2.3.5"
 logback = "1.4.11"
 mosaic = "0.9.1"
 jline = "3.23.0"
+clikt = "4.2.1"
 
 [plugins]
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
@@ -68,3 +69,4 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "k
 
 # terminal
 jline = { module = "org.jline:jline", version.ref = "jline" }
+clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }

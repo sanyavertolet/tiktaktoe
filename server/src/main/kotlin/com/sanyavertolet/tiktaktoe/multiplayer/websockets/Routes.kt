@@ -8,28 +8,44 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
+import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
+
+private val webSocketLogger = LoggerFactory.getLogger("webSocketLogger")
 
 fun Routing.gameRoute() = webSocket("/game") {
     try {
         for (frame in incoming) {
             val message = frame as? Frame.Text ?: continue
             val messageText = message.readText()
+            webSocketLogger.trace("Receiving $messageText")
             when (val request = Json.decodeFromString<Requests>(messageText)) {
                 is Requests.CreateLobby -> {
                     val user = WebSocketUser(request.userName, this)
-                    val lobby = request.lobbyCode?.let { Lobby(user, it) } ?: Lobby(user)
+                    val lobby = request.lobbyCode?.let {
+                        Lobby(user, request.fieldSize, request.winCondition, it)
+                    } ?: Lobby(user, request.fieldSize, request.winCondition)
                     Lobby.lobbies.add(lobby)
+                    lobby.notifyAll(
+                        Notifications.PlayerJoined(request.userName, request.fieldSize, request.winCondition),
+                    )
                 }
 
                 is Requests.JoinLobby -> {
                     val user = WebSocketUser(request.userName, this)
-                    Lobby.lobbies.find { it.lobbyCode == request.lobbyCode }?.connectUser(user)
+                    Lobby.lobbies.find { it.lobbyCode == request.lobbyCode }
+                        ?.also { it.connectUser(user) }
+                        ?.also { lobby ->
+                            lobby.notifyAll(
+                                Notifications.PlayerJoined(request.userName, lobby.boardSize, lobby.rowWinCount),
+                            )
+                        }
                 }
 
                 is Requests.LeaveLobby -> {
                     val lobby = Lobby.lobbies.find { it.lobbyCode == request.lobbyCode }
                     lobby?.disconnectUser(request.userName, this)
+                    lobby?.notifyAll(Notifications.PlayerLeft)
                 }
 
                 is Requests.StartGame -> {
@@ -45,8 +61,7 @@ fun Routing.gameRoute() = webSocket("/game") {
                         }
                         .let { game.turn(it) }
                         ?.let {
-                            val notification = Notifications.Turn(request.position)
-                            game.currentTurnPlayer.sendNotification(notification)
+                            game.sendAll(Notifications.Turn(game.previousTurnPlayer.name, request.position))
                         } ?: game.notifyEnd(game.previousTurnPlayer)
                 }
             }

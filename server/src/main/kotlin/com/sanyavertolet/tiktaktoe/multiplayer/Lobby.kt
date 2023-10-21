@@ -10,11 +10,11 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class Lobby<O : Any> (
     val host: User<O>,
+    val boardSize: Int,
+    val rowWinCount: Int,
     val lobbyCode: String = lobbyCounter.incrementAndGet().toString(),
 ) {
     private var anotherUser: User<O>? = null
-    private var boardSize: Int = 3
-    private var rowWinCount: Int = 3
 
     fun createGame() = anotherUser?.let {
         val players = listOf(
@@ -26,6 +26,10 @@ class Lobby<O : Any> (
 
     fun connectUser(user: User<O>) {
         anotherUser = user
+    }
+
+    suspend fun notifyAll(notifications: Notifications) = listOf(host, anotherUser).forEach {
+        it?.sendNotification(notifications)
     }
 
     suspend fun disconnectUser(userName: String, origin: O) {

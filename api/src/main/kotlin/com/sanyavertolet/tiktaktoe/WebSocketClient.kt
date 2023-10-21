@@ -3,6 +3,7 @@ package com.sanyavertolet.tiktaktoe
 import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.messages.Requests
 import io.ktor.client.*
+import io.ktor.client.engine.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.serialization.kotlinx.*
@@ -13,51 +14,44 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-val client = HttpClient(CIO) {
-    install(WebSockets) { contentConverter = KotlinxWebsocketSerializationConverter(Json) }
-}
-
-val messageQueue = Channel<Requests>()
-
-val scope = CoroutineScope(Dispatchers.Default)
-
-suspend fun startSessionAndRequest(
-    andAction: () -> Requests,
-) {
-    client.ws("/game") {
-        sendSerialized(andAction())
-
-        scope.launch { processIncoming() }
-        scope.launch { processOutgoing() }
+class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) {
+    private val scope = CoroutineScope(Dispatchers.Default)
+    private val client = HttpClient(engine) {
+        install(WebSockets) { contentConverter = KotlinxWebsocketSerializationConverter(Json) }
     }
-}
+    private val messageQueue = Channel<Requests>()
 
-suspend fun DefaultClientWebSocketSession.processOutgoing() {
-    for (message in messageQueue) {
-        sendSerialized(message)
-    }
-}
+    suspend fun startSessionAndRequest(
+        url: String = "/game",
+        onNotificationReceived: (Notifications) -> Unit,
+        andAction: () -> Requests,
+    ) {
+        client.webSocket(url) {
+            sendSerialized(andAction())
 
-suspend fun ClientWebSocketSession.processIncoming() {
-    for (frame in incoming) {
-        val message = (frame as? Frame.Text)?.readText() ?: throw WebSocketException("Could not read text")
-        val notification: Notifications = Json.decodeFromString(message)
-        when (notification) {
-            is Notifications.GameStarted -> {
-                TODO("Render field")
-            }
-            is Notifications.PlayerJoined -> {
-                TODO("Add player to lobby")
-            }
-            is Notifications.PlayerLeft -> {
-                TODO("Remove player from lobby")
-            }
-            is Notifications.GameFinished -> {
-                TODO("Show game winner")
-            }
-            is Notifications.Turn -> {
-                TODO("Process turn")
+            scope.launch { processIncoming(onNotificationReceived) }
+            scope.launch { processOutgoing() }
+
+            @Suppress("RedundantUnitExpression")
+            while (true) {
+                Unit
             }
         }
     }
+
+    private suspend fun DefaultClientWebSocketSession.processOutgoing() {
+        for (message in messageQueue) {
+            sendSerialized(message)
+        }
+    }
+
+    private suspend fun ClientWebSocketSession.processIncoming(onNotificationReceived: (Notifications) -> Unit) {
+        for (frame in incoming) {
+            val message = (frame as? Frame.Text)?.readText() ?: throw WebSocketException("Could not read text")
+            val notification: Notifications = Json.decodeFromString(message)
+            onNotificationReceived(notification)
+        }
+    }
+
+    fun sendRequest(requests: Requests) = scope.launch { messageQueue.send(requests) }
 }
