@@ -1,6 +1,7 @@
 package com.sanyavertolet.tiktaktoe.game
 
 import com.sanyavertolet.tiktaktoe.messages.Notifications
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 typealias Result = Pair<Boolean, PlayerType>
@@ -42,4 +43,8 @@ class TikTakToeGame(
     }
 
     suspend fun run() = notifyBegin().also { whoseTurn.set(0) }
+
+    companion object {
+        val games: ConcurrentHashMap<String, TikTakToeGame> = ConcurrentHashMap()
+    }
 }

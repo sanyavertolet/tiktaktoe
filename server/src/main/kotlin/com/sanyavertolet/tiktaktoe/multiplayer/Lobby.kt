@@ -37,8 +37,7 @@ class Lobby<O : Any> (
             close("Host has left")
         } else if (anotherUser?.name == userName && anotherUser?.origin == origin) {
             anotherUser = null
-            val notification: Notifications = Notifications.PlayerLeft
-            host.sendNotification(notification)
+            host.sendNotification(Notifications.PlayerLeft)
         }
     }
 
