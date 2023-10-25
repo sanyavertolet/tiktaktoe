@@ -28,7 +28,7 @@ import kotlin.system.exitProcess
 typealias FieldType = SnapshotStateMap<Position, Marker>
 
 abstract class GameCommand(help: String) : CliktCommand(help = help) {
-    protected open val url: String by option("--url", "-u").default("localhost").help { "Server url" }
+    protected open val url: String by option("--url", "-u").default("kznet.ftp.sh:8080").help { "Server hostname and port" }
     open val userName: String by argument("username").help { "User name" }
     open val lobbyCode: String by option("--lobby", "-l").required().help { "Lobby code" }
 

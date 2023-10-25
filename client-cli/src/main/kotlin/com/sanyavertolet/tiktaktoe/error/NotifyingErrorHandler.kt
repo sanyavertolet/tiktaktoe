@@ -10,7 +10,7 @@ class NotifyingErrorHandler(private val onExit: (Int) -> Unit) : ErrorHandler {
     }
 
     override fun onError(error: Throwable) {
-        printError(error.message ?: error.localizedMessage)
+        printError(error.message ?: error.localizedMessage ?: error.stackTraceToString())
         onExit(1)
     }
 }

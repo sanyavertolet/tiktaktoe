@@ -27,7 +27,7 @@ class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) : Client {
         onNotificationReceived: (Notifications) -> Unit,
         andAction: () -> Requests,
     ) {
-        client.webSocket(url) {
+        client.webSocket("ws://$url/game") {
             sendSerialized(andAction())
 
             scope.launch { processIncoming(onNotificationReceived) }
