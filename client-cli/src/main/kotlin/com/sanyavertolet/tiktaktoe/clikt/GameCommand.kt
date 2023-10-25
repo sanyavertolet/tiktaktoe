@@ -9,15 +9,16 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import com.jakewharton.mosaic.runMosaic
+import com.sanyavertolet.tiktaktoe.CliNotificationHandler
 import com.sanyavertolet.tiktaktoe.Client
+import com.sanyavertolet.tiktaktoe.ErrorHandler
 import com.sanyavertolet.tiktaktoe.WebSocketClient
+import com.sanyavertolet.tiktaktoe.error.NotifyingErrorHandler
+import com.sanyavertolet.tiktaktoe.game.Options
 import com.sanyavertolet.tiktaktoe.game.Position
 import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.ui.cli.*
-import com.sanyavertolet.tiktaktoe.utils.move
-import com.sanyavertolet.tiktaktoe.utils.withBorders
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,10 +32,36 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
     open val userName: String by argument("username").help { "User name" }
     open val lobbyCode: String by option("--lobby", "-l").required().help { "Lobby code" }
 
-    abstract val fieldSize: Int
-    abstract val winCondition: Int
+    abstract val options: Options
     private val gameScope = CoroutineScope(Dispatchers.Default)
     private val client: Client = WebSocketClient()
+    private val errorHandler: ErrorHandler = NotifyingErrorHandler(::exit)
+
+    protected open fun onPlayerJoined(playerJoined: Notifications.PlayerJoined) {
+        if (playerJoined.userName == userName) {
+            println(getLobbyMessage())
+        } else {
+            println("To start a game, press \"g\" button...")
+            client.sendRequest(Requests.StartGame(lobbyCode))
+        }
+    }
+
+    private val notificationHandler = object : CliNotificationHandler(errorHandler, ::exit) {
+        override fun onPlayerJoined(playerJoined: Notifications.PlayerJoined) = this@GameCommand.onPlayerJoined(playerJoined)
+
+        override fun onGameStarted(gameStarted: Notifications.GameStarted) {
+            myMarker = if (gameStarted.whoseTurnUserName == userName) Marker.TIC else Marker.TAC
+            isMyTurn = myMarker == Marker.TIC
+            processGameUi()
+        }
+
+        override fun onTurn(turn: Notifications.Turn) {
+            if (turn.userName != userName) {
+                field[turn.position] = opponentMarker
+                isMyTurn = true
+            }
+        }
+    }
 
     private var isMyTurn: Boolean = false
     private lateinit var myMarker: Marker
@@ -46,87 +73,46 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
 
     protected abstract fun getInitRequest(): Requests
 
-    private suspend fun initializeConnection() = client.startSessionAndRequest(url, ::onNotificationReceived, ::getInitRequest)
+    private suspend fun initializeConnection() = client.startSessionAndRequest(
+        url,
+        notificationHandler::onNotificationReceived,
+        ::getInitRequest,
+    )
 
     override fun run() {
         processConnection()
     }
 
     private fun processConnection() = runBlocking {
-        runCatching { initializeConnection() }.onFailure { it.printStackTrace().also { exitProcess(1) } }
+        runCatching { initializeConnection() }.onFailure(errorHandler::onError)
     }
 
     private val field: FieldType = mutableStateMapOf()
 
-    protected fun processGameUi() = gameScope.launch { startGame() }
-
-    private fun onNotificationReceived(notification: Notifications) {
-        when (notification) {
-            is Notifications.Turn -> onTurn(notification)
-            is Notifications.PlayerJoined -> onPlayerJoined(notification)
-            is Notifications.GameStarted -> onGameStarted(notification)
-            is Notifications.PlayerLeft -> onPlayerLeft(notification)
-            is Notifications.GameFinished -> onGameFinished(notification)
+    protected fun processGameUi() {
+        gameScope.launch {
+            startGame(field, options, ::exit) {
+                if (isMyTurn && field[it] == null) {
+                    field[it] = myMarker
+                    sendTurnRequest(it)
+                    isMyTurn = !isMyTurn
+                }
+            }
         }
+            .invokeOnCompletion { errorOrNull -> errorOrNull?.let { error -> errorHandler.onError(error) } }
     }
 
     protected abstract fun getLobbyMessage(): String
 
-    protected open fun onPlayerJoined(playerJoined: Notifications.PlayerJoined) {
-        if (playerJoined.userName == userName) {
-            println(getLobbyMessage())
-        } else {
-            println("To start a game, press \"g\" button...")
-            client.sendRequest(Requests.StartGame(lobbyCode))
-        }
-    }
-
-    protected open fun onGameStarted(gameStarted: Notifications.GameStarted) {
-        myMarker = if (gameStarted.whoseTurnUserName == userName) Marker.TIC else Marker.TAC
-        isMyTurn = myMarker == Marker.TIC
-        processGameUi()
-    }
-
-    protected open fun onGameFinished(gameFinished: Notifications.GameFinished) {
-        println("${gameFinished.whoWinsUserName} wins!")
-        exitProcess(0)
-    }
-
-    protected open fun onPlayerLeft(playerLeft: Notifications.PlayerLeft) {
-        println("User disconnected, you are the winner!")
-        exitProcess(0)
-    }
-
-    protected open fun onTurn(turn: Notifications.Turn) {
-        if (turn.userName != userName) {
-            field[turn.position] = opponentMarker
-            isMyTurn = true
-        }
-    }
-
-    private suspend fun startGame() = runMosaic {
-        field.clear()
-        var currentPos by mutableStateOf(Position(0, 0))
-
-        setContent {
-            Header(currentPos, fieldSize, winCondition)
-            Field(fieldSize.withBorders())
-            TicksAndTacks(field, fieldSize.withBorders())
-            Pointer(currentPos, fieldSize.withBorders())
-        }
-
-        val putMarker: suspend () -> Unit = {
-            if (isMyTurn) {
-                field[currentPos] = myMarker
-                sendTurnRequest(currentPos)
-                isMyTurn = !isMyTurn
-            }
-        }
-
-        processGameKeyboard(putMarker) { currentPos = currentPos.move(it, fieldSize) }
-    }
-
     protected open suspend fun sendTurnRequest(position: Position) {
         client.sendRequest(Requests.Turn(position, lobbyCode))
+    }
+
+    private fun exit(status: Int) {
+        try {
+            client.sendRequest(Requests.LeaveLobby(userName, lobbyCode))
+        } finally {
+            exitProcess(status)
+        }
     }
 }

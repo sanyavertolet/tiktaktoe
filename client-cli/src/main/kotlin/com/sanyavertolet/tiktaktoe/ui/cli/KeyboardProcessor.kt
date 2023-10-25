@@ -18,11 +18,12 @@ suspend fun processKeyboard(keyboardMapper: (CoroutineScope, Reader) -> Unit?) {
 }
 
 suspend fun processGameKeyboard(
+    onExit: (Int) -> Unit,
     putMarker: suspend () -> Unit,
     updatePosition: (Direction) -> Unit,
 ) = processKeyboard { scope, reader ->
     when (reader.read()) {
-        'q'.code -> null
+        'q'.code -> onExit(0)
         ' '.code -> scope.launch { coroutineScope { putMarker() } }.let { Unit }
         27 -> {
             when (reader.read()) {

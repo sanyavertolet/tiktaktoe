@@ -10,11 +10,9 @@ class Player<O : Any>(
     private val user: User<O>,
     val type: PlayerType,
 ) {
-    val name: String
-        get() = user.name
+    val name: String = user.name
 
-    val origin: O
-        get() = user.origin
+    val origin: O = user.origin
 
     private suspend fun sendMessage(message: String) = user.sendMessage(message)
         .also { logger.trace("Sending to $name: $message") }

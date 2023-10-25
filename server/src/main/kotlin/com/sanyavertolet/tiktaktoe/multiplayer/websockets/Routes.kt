@@ -13,7 +13,7 @@ fun Routing.gameRoute() = webSocket("/game") {
     val requestProcessor = WebSocketRequestProcessor()
     try {
         for (frame in incoming) {
-            val message = frame as? Frame.Text ?: continue
+            val message = frame.asTextOrError() ?: continue
             val messageText = message.readText()
             webSocketLogger.trace("Receiving $messageText")
             requestProcessor.onRequest(Json.decodeFromString<Requests>(messageText), this)
@@ -22,3 +22,5 @@ fun Routing.gameRoute() = webSocket("/game") {
         e.printStackTrace()
     }
 }
+
+fun Frame.asTextOrError() = this as? Frame.Text

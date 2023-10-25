@@ -1,6 +1,6 @@
 package com.sanyavertolet.tiktaktoe.multiplayer.websockets
 
-import com.sanyavertolet.tiktaktoe.game.TikTakToeGame
+import com.sanyavertolet.tiktaktoe.game.TikTakToeGame.Companion.games
 import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.multiplayer.Lobby
@@ -34,16 +34,18 @@ class WebSocketRequestProcessor : RequestProcessor<WebSocketSession> {
         val lobby = Lobby.lobbies.find { it.lobbyCode == request.lobbyCode }
         lobby?.disconnectUser(request.userName, session)
         lobby?.notifyAll(Notifications.PlayerLeft)
+        Lobby.lobbies.remove(lobby)
+        games.remove(request.lobbyCode)
     }
 
     override suspend fun onStartGame(request: Requests.StartGame, session: WebSocketSession) {
         val lobby = Lobby.lobbies.find { it.host.origin == session && it.lobbyCode == request.lobbyCode }
             ?: error("Forbidden to create such lobby.")
-        TikTakToeGame.games[lobby.lobbyCode] = lobby.createGame().also { it.run() }
+        games[lobby.lobbyCode] = lobby.createGame().also { it.run() }
     }
 
     override suspend fun onTurn(request: Requests.Turn, session: WebSocketSession) {
-        val game = TikTakToeGame.games[request.lobbyCode] ?: error("No such game")
+        val game = games[request.lobbyCode] ?: error("No such game")
         request.position
             .let { pos ->
                 pos.takeIf { game.currentTurnPlayer.origin == session } ?: error("Not your turn")

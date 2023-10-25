@@ -16,10 +16,8 @@ fun fieldPadding(x: Int, y: Int, fieldSizeWithBorders: Int) = Modifier.padding(
 )
 
 fun markerPadding(pos: Position, fieldSizeWithBorders: Int) = Modifier.padding(
-    pos.x.withBorders(),
-    TOP_PADDING + pos.y.withBorders(),
-    fieldSizeWithBorders - pos.x.withBorders(),
-    fieldSizeWithBorders - pos.y.withBorders(),
+    2 * pos.x + 1,
+    TOP_PADDING + 2 * pos.y + 1,
+    fieldSizeWithBorders - (2 * pos.x + 1),
+    fieldSizeWithBorders - (2 * pos.y + 1),
 )
-
-fun Int.withBorders() = 2 * this + 1
