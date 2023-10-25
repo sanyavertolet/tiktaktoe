@@ -14,6 +14,8 @@ class Player<O : Any>(
 
     val origin: O = user.origin
 
+    fun isActive() = user.isActive()
+
     private suspend fun sendMessage(message: String) = user.sendMessage(message)
         .also { logger.trace("Sending to $name: $message") }
 

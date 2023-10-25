@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlin.system.exitProcess
 
 class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) : Client {
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -32,10 +33,8 @@ class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) : Client {
             scope.launch { processIncoming(onNotificationReceived) }
             scope.launch { processOutgoing() }
 
-            @Suppress("RedundantUnitExpression")
-            while (true) {
-                Unit
-            }
+            println(closeReason.await()?.message)
+            exitProcess(0)
         }
     }
 

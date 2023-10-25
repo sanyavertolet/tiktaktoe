@@ -16,6 +16,9 @@ class Lobby<O : Any> (
 ) {
     private var anotherUser: User<O>? = null
 
+    val users: List<User<O>>
+        get() = listOfNotNull(host, anotherUser)
+
     fun createGame() = anotherUser?.let {
         val players = listOf(
             Player(host, PlayerType.TICK),
@@ -42,13 +45,17 @@ class Lobby<O : Any> (
     }
 
     suspend fun close(disconnectReason: String = DEFAULT_DISCONNECT_MESSAGE) {
-        host.disconnect(disconnectReason)
-        anotherUser?.disconnect(disconnectReason)
+        try {
+            host.disconnect(disconnectReason)
+        } finally {
+            anotherUser?.disconnect(disconnectReason)
+        }
+        lobbies.find { it.lobbyCode == lobbyCode }?.let { lobbies.remove(it) }
     }
 
     companion object {
         val lobbyCounter = AtomicInteger(0)
-        val lobbies: MutableSet<Lobby<WebSocketSession>> = mutableSetOf()
-        private const val DEFAULT_DISCONNECT_MESSAGE = "Lobby was closed."
+        val lobbies: MutableSet<Lobby<DefaultWebSocketSession>> = mutableSetOf()
+        private const val DEFAULT_DISCONNECT_MESSAGE = "Lobby was closed as the opponent has left."
     }
 }

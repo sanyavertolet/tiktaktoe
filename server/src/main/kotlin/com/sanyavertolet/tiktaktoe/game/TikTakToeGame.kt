@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger
 typealias Result = Pair<Boolean, PlayerType>
 
 class TikTakToeGame(
-    private val players: List<Player<*>>,
+    val players: List<Player<*>>,
     boardSize: Int,
     rowWinCount: Int,
 ) {
