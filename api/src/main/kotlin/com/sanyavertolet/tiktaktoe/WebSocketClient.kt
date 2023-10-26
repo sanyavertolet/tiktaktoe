@@ -13,10 +13,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
-class WebSocketClient(engine: HttpClientEngineFactory<*> = CIO) : Client {
-    private val scope = CoroutineScope(Dispatchers.Default)
+class WebSocketClient(
+    coroutineContext: CoroutineContext = Dispatchers.IO,
+    engine: HttpClientEngineFactory<*> = CIO,
+) : Client {
+    private val scope = CoroutineScope(coroutineContext)
     private val client = HttpClient(engine) {
         install(WebSockets) { contentConverter = KotlinxWebsocketSerializationConverter(Json) }
     }

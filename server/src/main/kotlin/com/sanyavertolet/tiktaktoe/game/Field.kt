@@ -1,17 +1,19 @@
 package com.sanyavertolet.tiktaktoe.game
 
+typealias FieldType = Array<Array<MarkerType?>>
+
 class Field(private val boardSize: Int, private val rowWinCount: Int) {
-    private val field = Array(boardSize) { Array(boardSize) { PlayerType.NONE } }
+    private val field: FieldType = Array(boardSize) { Array(boardSize) { null } }
 
     operator fun get(position: Position) = field[position.x][position.y]
-    operator fun set(position: Position, playerType: PlayerType) {
-        field[position.x][position.y] = playerType
+    operator fun set(position: Position, markerType: MarkerType) {
+        field[position.x][position.y] = markerType
     }
 
     operator fun set(position: Position, player: Player<*>) = set(position, player.type)
 
-    fun whoWins(): Pair<Boolean, PlayerType> {
-        fun checkDirection(iStart: Int, jStart: Int, iStep: Int, jStep: Int, player: PlayerType): Boolean {
+    fun whoWins(): Pair<Boolean, MarkerType?> {
+        fun checkDirection(iStart: Int, jStart: Int, iStep: Int, jStep: Int, player: MarkerType): Boolean {
             return (0 until rowWinCount).all { field[iStart + it * iStep][jStart + it * jStep] == player }
         }
 
@@ -21,7 +23,7 @@ class Field(private val boardSize: Int, private val rowWinCount: Int) {
             for (j in 0 until boardSize) {
                 val player = field[i][j]
 
-                if (player == PlayerType.NONE) {
+                if (player == null) {
                     gameInProgress = true
                     continue
                 }
@@ -41,6 +43,6 @@ class Field(private val boardSize: Int, private val rowWinCount: Int) {
             }
         }
 
-        return !gameInProgress to PlayerType.NONE
+        return !gameInProgress to null
     }
 }

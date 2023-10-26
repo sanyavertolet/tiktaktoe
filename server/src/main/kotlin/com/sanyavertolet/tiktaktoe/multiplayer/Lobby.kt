@@ -1,8 +1,8 @@
 package com.sanyavertolet.tiktaktoe.multiplayer
 
-import com.sanyavertolet.tiktaktoe.exceptions.LobbyException
+import com.sanyavertolet.tiktaktoe.exceptions.GameException
+import com.sanyavertolet.tiktaktoe.game.MarkerType
 import com.sanyavertolet.tiktaktoe.game.Player
-import com.sanyavertolet.tiktaktoe.game.PlayerType
 import com.sanyavertolet.tiktaktoe.game.TikTakToeGame
 import com.sanyavertolet.tiktaktoe.messages.Notifications
 import io.ktor.websocket.*
@@ -21,11 +21,11 @@ class Lobby<O : Any> (
 
     fun createGame() = anotherUser?.let {
         val players = listOf(
-            Player(host, PlayerType.TICK),
-            Player(it, PlayerType.CROSS),
+            Player(host, MarkerType.TIC),
+            Player(it, MarkerType.TAC),
         )
         TikTakToeGame(players, boardSize, rowWinCount)
-    } ?: throw LobbyException()
+    } ?: throw GameException("User was not found", false)
 
     fun connectUser(user: User<O>) {
         anotherUser = user

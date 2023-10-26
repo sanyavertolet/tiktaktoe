@@ -4,7 +4,7 @@ import com.sanyavertolet.tiktaktoe.messages.Notifications
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
-typealias Result = Pair<Boolean, PlayerType>
+typealias Result = Pair<Boolean, MarkerType?>
 
 class TikTakToeGame(
     val players: List<Player<*>>,
@@ -16,9 +16,9 @@ class TikTakToeGame(
 
     private fun whoWins(): Result = field.whoWins()
 
-    private suspend fun notifyBegin() = sendAll(Notifications.GameStarted(currentTurnPlayer.name))
+    private suspend fun notifyBegin() = notifyAll(Notifications.GameStarted(currentTurnPlayer.name))
 
-    suspend fun notifyEnd(winner: Player<*>?) = sendAll(Notifications.GameFinished(winner?.name))
+    suspend fun notifyEnd(winner: Player<*>?) = notifyAll(Notifications.GameFinished(winner?.name))
 
     suspend fun turn(position: Position): Position? {
         field[position] = currentTurnPlayer
@@ -38,7 +38,7 @@ class TikTakToeGame(
     val previousTurnPlayer: Player<*>
         get() = players[(whoseTurn.get() + 1) % 2]
 
-    suspend fun sendAll(notification: Notifications) {
+    suspend fun notifyAll(notification: Notifications) {
         players.forEach { it.sendNotification(notification) }
     }
 

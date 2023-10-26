@@ -16,7 +16,5 @@ class WebSocketUser(
 
     override suspend fun sendNotification(notification: Notifications) = sendMessage(Json.encodeToString(notification))
 
-    override suspend fun disconnect(reasonMessage: String) {
-        origin.close(CloseReason(CloseReason.Codes.NORMAL, reasonMessage))
-    }
+    override suspend fun disconnect(reasonMessage: String) = origin.close(CloseReason(CloseReason.Codes.NORMAL, reasonMessage))
 }

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 class Player<O : Any>(
     private val user: User<O>,
-    val type: PlayerType,
+    val type: MarkerType,
 ) {
     val name: String = user.name
 
@@ -24,10 +24,4 @@ class Player<O : Any>(
     companion object {
         private val logger = LoggerFactory.getLogger("UserLogger")
     }
-}
-
-enum class PlayerType {
-    TICK,
-    CROSS,
-    NONE,
 }

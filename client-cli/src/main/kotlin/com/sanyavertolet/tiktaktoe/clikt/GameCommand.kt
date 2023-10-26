@@ -9,13 +9,14 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import com.sanyavertolet.tiktaktoe.CliNotificationHandler
 import com.sanyavertolet.tiktaktoe.Client
-import com.sanyavertolet.tiktaktoe.ErrorHandler
 import com.sanyavertolet.tiktaktoe.WebSocketClient
-import com.sanyavertolet.tiktaktoe.error.NotifyingErrorHandler
+import com.sanyavertolet.tiktaktoe.game.MarkerType
 import com.sanyavertolet.tiktaktoe.game.Options
 import com.sanyavertolet.tiktaktoe.game.Position
+import com.sanyavertolet.tiktaktoe.handlers.CliNotificationHandler
+import com.sanyavertolet.tiktaktoe.handlers.ErrorHandler
+import com.sanyavertolet.tiktaktoe.handlers.NotifyingErrorHandler
 import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.ui.cli.*
@@ -25,12 +26,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.system.exitProcess
 
-typealias FieldType = SnapshotStateMap<Position, Marker>
+typealias FieldType = SnapshotStateMap<Position, MarkerType>
 
 abstract class GameCommand(help: String) : CliktCommand(help = help) {
-    protected open val url: String by option("--url", "-u").default("kznet.ftp.sh:8080").help { "Server hostname and port" }
+    protected open val url: String by option("--url", "-u").default("kznet.ftp.sh:8080").help {
+        "Server hostname and port in format \"url:port\""
+    }
     open val userName: String by argument("username").help { "User name" }
-    open val lobbyCode: String by option("--lobby", "-l").required().help { "Lobby code" }
+    open val lobbyCode: String by option("--lobby", "-l").required().help {
+        "Desired lobby code, which will be used to connect to lobby"
+    }
 
     abstract val options: Options
     private val gameScope = CoroutineScope(Dispatchers.Default)
@@ -50,8 +55,8 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
         override fun onPlayerJoined(playerJoined: Notifications.PlayerJoined) = this@GameCommand.onPlayerJoined(playerJoined)
 
         override fun onGameStarted(gameStarted: Notifications.GameStarted) {
-            myMarker = if (gameStarted.whoseTurnUserName == userName) Marker.TIC else Marker.TAC
-            isMyTurn = myMarker == Marker.TIC
+            myMarker = if (gameStarted.whoseTurnUserName == userName) MarkerType.TIC else MarkerType.TAC
+            isMyTurn = myMarker == MarkerType.TIC
             processGameUi()
         }
 
@@ -64,11 +69,11 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
     }
 
     private var isMyTurn: Boolean = false
-    private lateinit var myMarker: Marker
-    private val opponentMarker: Marker
+    private lateinit var myMarker: MarkerType
+    private val opponentMarker: MarkerType
         get() = when (myMarker) {
-            Marker.TAC -> Marker.TIC
-            Marker.TIC -> Marker.TAC
+            MarkerType.TAC -> MarkerType.TIC
+            MarkerType.TIC -> MarkerType.TAC
         }
 
     protected abstract fun getInitRequest(): Requests

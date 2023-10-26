@@ -21,5 +21,5 @@ sealed class Notifications {
     data class Turn(val userName: String, val position: Position) : Notifications()
 
     @Serializable
-    data class Error(val errorMessage: String, val stackTrace: String) : Notifications()
+    data class Error(val errorMessage: String, val isCritical: Boolean, val stackTrace: String?) : Notifications()
 }
