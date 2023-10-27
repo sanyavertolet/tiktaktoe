@@ -22,7 +22,7 @@ suspend fun startGame(
         Header(currentPos, options)
         Field(options)
         TicksAndTacks(field, options)
-        Pointer(currentPos, options)
+        Pointer(currentPos, options, field[currentPos]?.ch ?: " ")
     }
 
     processGameKeyboard(exit, { putMarker(currentPos) }) { currentPos = currentPos.move(it, options.fieldSize) }

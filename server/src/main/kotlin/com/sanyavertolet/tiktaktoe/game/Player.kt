@@ -22,6 +22,6 @@ class Player<O : Any>(
     suspend fun sendNotification(notification: Notifications) = sendMessage(Json.encodeToString(notification))
 
     companion object {
-        private val logger = LoggerFactory.getLogger("UserLogger")
+        private val logger = LoggerFactory.getLogger(Player::class.java)
     }
 }
