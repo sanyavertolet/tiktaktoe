@@ -1,30 +1,30 @@
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
     alias(libs.plugins.kotlin.serialization)
     id("com.sanyavertolet.tiktaktoe.buildutils.code-quality-convention")
-    id("org.jetbrains.compose") version "1.5.3"
 }
 
 repositories {
     mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
-dependencies {
-    implementation(projects.common)
-    implementation(compose.desktop.currentOs)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.websockets)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.logback.classic)
-    testImplementation(libs.kotlin.test.junit)
-}
+kotlin {
+    jvm()
+    js {
+        browser()
+    }
 
-compose.desktop {
-    application {
-        mainClass = "ApplicationKt"
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(projects.common)
+                api(libs.ktor.client.core)
+                api(libs.ktor.client.logging)
+                api(libs.ktor.client.content.negotiation)
+                api(libs.ktor.client.websockets)
+            }
+        }
     }
 }
+
+

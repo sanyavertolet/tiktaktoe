@@ -20,6 +20,7 @@ import com.sanyavertolet.tiktaktoe.handlers.NotifyingErrorHandler
 import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.ui.cli.*
+import io.ktor.client.engine.cio.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +40,7 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
 
     abstract val options: Options
     private val gameScope = CoroutineScope(Dispatchers.Default)
-    private val client: Client = WebSocketClient()
+    private val client: Client = WebSocketClient(CIO)
     private val errorHandler: ErrorHandler = NotifyingErrorHandler(::exit)
 
     protected open fun onPlayerJoined(playerJoined: Notifications.PlayerJoined) {

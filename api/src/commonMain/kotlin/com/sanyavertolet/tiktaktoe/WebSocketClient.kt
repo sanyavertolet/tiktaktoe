@@ -4,7 +4,6 @@ import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.messages.Requests
 import io.ktor.client.*
 import io.ktor.client.engine.*
-import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.websocket.*
@@ -14,11 +13,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.CoroutineContext
-import kotlin.system.exitProcess
 
 class WebSocketClient(
-    coroutineContext: CoroutineContext = Dispatchers.IO,
-    engine: HttpClientEngineFactory<*> = CIO,
+    engine: HttpClientEngineFactory<*>,
+    coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : Client {
     private val scope = CoroutineScope(coroutineContext)
     private val client = HttpClient(engine) {
@@ -38,7 +36,6 @@ class WebSocketClient(
             scope.launch { processOutgoing() }
 
             println(closeReason.await()?.message)
-            exitProcess(0)
         }
     }
 

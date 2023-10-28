@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
     alias(libs.plugins.kotlin.serialization)
     id("com.sanyavertolet.tiktaktoe.buildutils.code-quality-convention")
 }
@@ -8,7 +8,16 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation(libs.logback.classic)
-    implementation(libs.ktor.serialization.kotlinx.json)
+kotlin {
+    js {
+        browser()
+    }
+    jvm()
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(libs.ktor.serialization.kotlinx.json)
+            }
+        }
+    }
 }
