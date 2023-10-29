@@ -1,5 +1,20 @@
 rootProject.name = "tiktaktoe"
 
+dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
+    repositories {
+        mavenCentral()
+        maven {
+            name = "sanyavertolet/kotlin-js-preview-idea-plugin"
+            url = uri("https://maven.pkg.github.com/sanyavertolet/kotlin-js-preview-idea-plugin")
+            credentials {
+                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+                password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
 pluginManagement {
     repositories {
         mavenCentral()
@@ -17,7 +32,8 @@ plugins {
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 includeBuild("gradle/plugins")
+include("common")
+include("api")
 include("server")
 include("client-cli")
-include("api")
-include("common")
+include("client-browser")

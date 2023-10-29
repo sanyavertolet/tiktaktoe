@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.CoroutineContext
 
-class WebSocketClient(
+open class WebSocketClient(
     engine: HttpClientEngineFactory<*>,
     coroutineContext: CoroutineContext = Dispatchers.Default,
 ) : Client {
@@ -48,6 +48,7 @@ class WebSocketClient(
     private suspend fun ClientWebSocketSession.processIncoming(onNotificationReceived: (Notifications) -> Unit) {
         for (frame in incoming) {
             val message = (frame as? Frame.Text)?.readText() ?: throw WebSocketException("Could not read text")
+            println(message)
             val notification: Notifications = Json.decodeFromString(message)
             onNotificationReceived(notification)
         }

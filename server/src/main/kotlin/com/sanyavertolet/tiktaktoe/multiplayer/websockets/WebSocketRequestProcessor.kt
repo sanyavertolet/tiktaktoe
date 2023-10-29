@@ -24,8 +24,8 @@ class WebSocketRequestProcessor(
             Lobby(user, request.fieldSize, request.winCondition, it)
         } ?: Lobby(user, request.fieldSize, request.winCondition)
         Lobby.lobbies.add(lobby)
-        lobby.notifyAll(
-            Notifications.PlayerJoined(request.userName, request.fieldSize, request.winCondition),
+        user.sendNotification(
+            Notifications.PlayerJoined(null, request.fieldSize, request.winCondition),
         )
     }
 
@@ -34,8 +34,11 @@ class WebSocketRequestProcessor(
         Lobby.lobbies.find { it.lobbyCode == request.lobbyCode }
             ?.also { it.connectUser(user) }
             ?.also { lobby ->
-                lobby.notifyAll(
+                lobby.host.sendNotification(
                     Notifications.PlayerJoined(request.userName, lobby.boardSize, lobby.rowWinCount),
+                )
+                user.sendNotification(
+                    Notifications.PlayerJoined(lobby.host.name, lobby.boardSize, lobby.rowWinCount),
                 )
             } ?: throw GameException("Lobby [${request.lobbyCode}] was not found.", true)
     }
@@ -51,7 +54,7 @@ class WebSocketRequestProcessor(
 
     override suspend fun onStartGame(request: Requests.StartGame, session: DefaultWebSocketSession) {
         Lobby.lobbies.find { it.host.origin == session && it.lobbyCode == request.lobbyCode }
-            ?.let { lobby -> games[lobby.lobbyCode] = lobby.createGame().also { game -> game.run() } }
+            ?.also { lobby -> games[lobby.lobbyCode] = lobby.createGame().also { game -> game.run() } }
             ?: throw GameException("Forbidden to create such lobby.", true)
     }
 

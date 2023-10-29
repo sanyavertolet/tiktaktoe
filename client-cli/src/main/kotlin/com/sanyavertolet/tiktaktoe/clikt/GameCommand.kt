@@ -44,7 +44,7 @@ abstract class GameCommand(help: String) : CliktCommand(help = help) {
     private val errorHandler: ErrorHandler = NotifyingErrorHandler(::exit)
 
     protected open fun onPlayerJoined(playerJoined: Notifications.PlayerJoined) {
-        if (playerJoined.userName == userName) {
+        if (playerJoined.anotherUserName != null) {
             println(getLobbyMessage())
         } else {
             println("To start a game, press \"g\" button...")
