@@ -66,7 +66,7 @@ class WebSocketRequestProcessor(
                 }
                 .let { game.turn(it) }
                 ?.let { game.notifyAll(Notifications.Turn(game.previousTurnPlayer.name, request.position)) }
-                ?: game.notifyEnd(game.previousTurnPlayer)
+                ?: Unit
         } ?: throw GameException("Lobby with code [${request.lobbyCode}] was not found.", true)
     }
 }
