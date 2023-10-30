@@ -35,3 +35,10 @@ dependencies {
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
 }
+
+tasks.shadowJar {
+    dependsOn(":client-browser:jsBrowserDistribution")
+    from(project(":client-browser").buildDir.resolve("dist/js/productionExecutable")) {
+        into("public/")
+    }
+}
