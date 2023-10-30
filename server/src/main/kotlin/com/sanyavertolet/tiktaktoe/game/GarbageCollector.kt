@@ -45,4 +45,10 @@ class GarbageCollector(
             }
         }
     }
+    companion object {
+        fun cleanUp(lobbyCode: String) {
+            lobbies.find { it.lobbyCode == lobbyCode }?.let { lobbies.remove(it) }
+            games.remove(lobbyCode)
+        }
+    }
 }

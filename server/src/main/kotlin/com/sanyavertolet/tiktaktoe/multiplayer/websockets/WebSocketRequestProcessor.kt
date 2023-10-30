@@ -3,6 +3,7 @@ package com.sanyavertolet.tiktaktoe.multiplayer.websockets
 import com.sanyavertolet.tiktaktoe.exceptions.ErrorHandler
 import com.sanyavertolet.tiktaktoe.exceptions.GameException
 import com.sanyavertolet.tiktaktoe.exceptions.NotifyingWebSocketErrorHandler
+import com.sanyavertolet.tiktaktoe.game.GarbageCollector
 import com.sanyavertolet.tiktaktoe.games
 import com.sanyavertolet.tiktaktoe.lobbies
 import com.sanyavertolet.tiktaktoe.messages.Notifications
@@ -70,7 +71,7 @@ class WebSocketRequestProcessor(
                 }
                 .let { game.turn(it) }
                 ?.let { game.notifyAll(Notifications.Turn(game.previousTurnPlayer.name, request.position)) }
-                ?: Unit
+                ?: GarbageCollector.cleanUp(request.lobbyCode)
         } ?: throw GameException("Lobby with code [${request.lobbyCode}] was not found.", true)
     }
 }
