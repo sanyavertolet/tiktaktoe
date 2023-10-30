@@ -33,6 +33,10 @@ kotlin {
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react-router")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react-router-dom")
 
+                implementation(platform("org.kotlincrypto.hash:bom:0.3.0"))
+                implementation("org.kotlincrypto.hash:md")
+
+
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-mui")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-mui-icons")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion")

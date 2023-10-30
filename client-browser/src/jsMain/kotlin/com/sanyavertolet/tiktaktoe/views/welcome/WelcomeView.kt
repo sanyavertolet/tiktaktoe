@@ -29,7 +29,7 @@ private enum class Mode(val prettyString: String) {
 val welcomeView = FC {
     val navigate = useNavigate()
     val (userName, setUserName) = useState(localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY).orEmpty())
-
+    val (isUserNameValid, setIsUserNameValid) = useState(true)
     val (createOrJoin, setCreateOrJoin) = useState(Mode.CREATE)
 
     Container {
@@ -48,8 +48,10 @@ val welcomeView = FC {
                     label = ReactNode("Name")
                     variant = FormControlVariant.outlined
                     value = userName
+                    error = !isUserNameValid
                     onChange = {
                         setUserName(it.targetString)
+                        setIsUserNameValid(userName.isNameValid())
                         localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, it.targetString)
                     }
                 }
@@ -87,14 +89,19 @@ val welcomeView = FC {
                 sx { paddingTop = 2.rem }
                 when (createOrJoin) {
                     Mode.CREATE -> createComponent {
+                        hostName = userName
                         onGoButtonPressed = { lobbyCode, options ->
-                            navigate("/$userName/$lobbyCode?c=${options.winCondition}&s=${options.fieldSize}")
+                            if (isUserNameValid) {
+                                navigate("/$userName/$lobbyCode?c=${options.winCondition}&s=${options.fieldSize}")
+                            }
                         }
                     }
 
                     Mode.JOIN -> joinComponent {
                         onGoButtonPressed = { lobbyCode ->
-                            navigate("/$userName/$lobbyCode")
+                            if (isUserNameValid) {
+                                navigate("/$userName/$lobbyCode")
+                            }
                         }
                     }
 
@@ -108,3 +115,5 @@ val welcomeView = FC {
         }
     }
 }
+
+private fun String.isNameValid() = length in 2..15

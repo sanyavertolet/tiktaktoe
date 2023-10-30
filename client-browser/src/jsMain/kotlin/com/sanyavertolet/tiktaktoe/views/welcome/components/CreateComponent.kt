@@ -1,7 +1,9 @@
 package com.sanyavertolet.tiktaktoe.views.welcome.components
 
 import com.sanyavertolet.tiktaktoe.game.Options
+import com.sanyavertolet.tiktaktoe.utils.getMD5
 import com.sanyavertolet.tiktaktoe.utils.targetString
+import com.sanyavertolet.tiktaktoe.utils.useOnce
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
@@ -14,11 +16,17 @@ import web.cssom.rem
 
 external interface CreateComponentProps : Props {
     var onGoButtonPressed: (String, Options) -> Unit
+    var hostName: String
 }
 
 val createComponent: FC<CreateComponentProps> = FC { props ->
     val (lobbyCode, setLobbyCode) = useState("")
     val (options, setOptions) = useState(Options.default)
+
+    useOnce {
+        setLobbyCode(props.hostName.getMD5(6))
+    }
+
     Stack {
         sx { paddingTop = 1.rem }
         spacing = responsive(2)
@@ -29,6 +37,7 @@ val createComponent: FC<CreateComponentProps> = FC { props ->
             label = ReactNode("Lobby code")
             variant = FormControlVariant.outlined
             value = lobbyCode
+            disabled = true
             onChange = {
                 setLobbyCode(it.targetString)
             }
