@@ -1,6 +1,6 @@
 package com.sanyavertolet.tiktaktoe
 
-import com.sanyavertolet.tiktaktoe.routing.createBrowserRouter
+import com.sanyavertolet.tiktaktoe.routing.createRouter
 import com.sanyavertolet.tiktaktoe.themes.themeProvider
 import com.sanyavertolet.tiktaktoe.views.errorView
 import mui.material.Container
@@ -22,7 +22,7 @@ val app = FC {
                 +"Tik-Tak-Toe game"
             }
             RouterProvider {
-                router = createBrowserRouter()
+                router = createRouter()
                 fallbackElement = errorView.create()
             }
         }

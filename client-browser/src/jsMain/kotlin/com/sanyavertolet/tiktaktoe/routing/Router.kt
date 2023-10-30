@@ -7,9 +7,9 @@ import com.sanyavertolet.tiktaktoe.views.welcome.welcomeView
 import io.ktor.http.*
 import js.core.jso
 import react.create
-import react.router.dom.createBrowserRouter
+import react.router.dom.createHashRouter
 
-fun createBrowserRouter() = createBrowserRouter(
+fun createRouter() = createHashRouter(
     arrayOf(
         jso {
             id = "welcome-route"

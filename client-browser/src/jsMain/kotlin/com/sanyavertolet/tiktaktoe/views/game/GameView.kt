@@ -53,8 +53,6 @@ val gameView = FC {
         setIsMyTurn(userNameFromUrl == whoIsFirst)
     }
 
-    console.log(markerType)
-
     val onGameFinished: GameFinishedCallback = { whoIsTheWinner ->
         setWinnerUserName(whoIsTheWinner)
         setIsWinnerModalShown(true)
@@ -96,6 +94,7 @@ val gameView = FC {
     winnerModal {
         this.isOpen = isWinnerModalShown
         this.winnerUserName = winnerUserName
+        this.closeModalCallback = { setIsWinnerModalShown(false).also { navigate("/") } }
     }
 
     when {
@@ -105,6 +104,7 @@ val gameView = FC {
             this.opponentName = opponentName
             this.startGame = client::sendGameStartRequest
             this.isHost = optionsFromUrl != null
+            this.lobbyCode = lobbyCodeFromUrl
         }
         else -> gameComponent {
             this.isMyTurn = isMyTurn

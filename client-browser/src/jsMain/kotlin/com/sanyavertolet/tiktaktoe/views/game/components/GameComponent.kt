@@ -7,6 +7,7 @@ import com.sanyavertolet.tiktaktoe.utils.FieldType
 import mui.icons.material.Close
 import mui.icons.material.RadioButtonUnchecked
 import mui.material.*
+import mui.system.responsive
 import mui.system.sx
 import react.ChildrenBuilder
 import react.FC
@@ -18,10 +19,10 @@ import web.cssom.rem
 private fun ChildrenBuilder.renderField(fieldSize: Int, field: FieldType, onClickCallback: (Position) -> Unit) {
     Container {
         Stack {
-            direction = "row".asDynamic()
+            direction = responsive(StackDirection.row)
             for (i in 0 until fieldSize) {
                 Stack {
-                    dir = "column".asDynamic()
+                    direction = responsive(StackDirection.column)
                     for (j in 0 until fieldSize) {
                         val position = Position(i, j)
                         val marker = field[Position(i, j)]

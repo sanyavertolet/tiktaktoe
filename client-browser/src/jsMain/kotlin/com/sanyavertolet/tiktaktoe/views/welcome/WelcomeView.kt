@@ -36,7 +36,6 @@ val welcomeView = FC {
                 paddingTop = 2.rem
                 height = 50.vh
             }
-
             Stack {
                 spacing = responsive(2)
 
