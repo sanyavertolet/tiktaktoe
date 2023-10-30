@@ -17,6 +17,7 @@ import web.cssom.rem
 external interface CreateComponentProps : Props {
     var onGoButtonPressed: (String, Options) -> Unit
     var hostName: String
+    var isGoButtonDisabled: Boolean
 }
 
 val createComponent: FC<CreateComponentProps> = FC { props ->
@@ -72,6 +73,7 @@ val createComponent: FC<CreateComponentProps> = FC { props ->
         Button {
             variant = ButtonVariant.outlined
             onClick = { props.onGoButtonPressed(lobbyCode, options) }
+            disabled = props.isGoButtonDisabled
             +"Go!"
         }
     }

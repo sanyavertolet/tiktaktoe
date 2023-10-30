@@ -13,6 +13,7 @@ import web.cssom.rem
 
 external interface JoinComponentProps : Props {
     var onGoButtonPressed: (String) -> Unit
+    var isGoButtonDisabled: Boolean
 }
 
 val joinComponent: FC<JoinComponentProps> = FC { props ->
@@ -35,6 +36,7 @@ val joinComponent: FC<JoinComponentProps> = FC { props ->
         Button {
             variant = ButtonVariant.outlined
             onClick = { props.onGoButtonPressed(lobbyCode) }
+            disabled = lobbyCode.isBlank() || props.isGoButtonDisabled
             +"Go!"
         }
     }

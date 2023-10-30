@@ -27,15 +27,16 @@ open class WebSocketClient(
     override suspend fun startSessionAndRequest(
         url: String,
         onNotificationReceived: (Notifications) -> Unit,
-        andAction: () -> Requests,
+        onConnectionSend: () -> Requests,
+        onClose: (String?) -> Unit,
     ) {
         client.webSocket("ws://$url/game") {
-            sendSerialized(andAction())
+            sendSerialized(onConnectionSend())
 
             scope.launch { processIncoming(onNotificationReceived) }
             scope.launch { processOutgoing() }
 
-            println(closeReason.await()?.message)
+            onClose(closeReason.await()?.message)
         }
     }
 
@@ -48,7 +49,6 @@ open class WebSocketClient(
     private suspend fun ClientWebSocketSession.processIncoming(onNotificationReceived: (Notifications) -> Unit) {
         for (frame in incoming) {
             val message = (frame as? Frame.Text)?.readText() ?: throw WebSocketException("Could not read text")
-            println(message)
             val notification: Notifications = Json.decodeFromString(message)
             onNotificationReceived(notification)
         }

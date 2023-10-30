@@ -1,6 +1,7 @@
 package com.sanyavertolet.tiktaktoe.views.game
 
 import com.sanyavertolet.tiktaktoe.BrowserWebSocketClient
+import com.sanyavertolet.tiktaktoe.components.errorModal
 import com.sanyavertolet.tiktaktoe.components.winnerModal
 import com.sanyavertolet.tiktaktoe.game.MarkerType
 import com.sanyavertolet.tiktaktoe.game.Options
@@ -32,6 +33,14 @@ val gameView = FC {
     val (winnerUserName, setWinnerUserName) = useState<String?>(null)
     val (opponentName, setOpponentName) = useState<String?>(null)
     val (opponentTurn, setOpponentTurn) = useState<Position?>(null)
+
+    val (errorMessage, setErrorMessage) = useState<String?>(null)
+
+    errorModal {
+        this.isOpen = errorMessage != null
+        this.errorMessage = errorMessage.orEmpty()
+        this.closeModalCallback = { setErrorMessage(null).also { navigate("/", jso { replace = true }) } }
+    }
 
     useEffect(opponentTurn) {
         opponentTurn?.let { opponentTurn ->
@@ -70,12 +79,11 @@ val gameView = FC {
         }
     }
 
-    val onError: ErrorCallback = { error, isCritical ->
-        console.log(error)
-        if (isCritical) {
-            navigate(to = "/", jso { replace = true })
-        }
+    val onError: ErrorCallback = { error, _ ->
+        setErrorMessage(error)
     }
+
+    console.log(errorMessage)
 
     val jsNotificationHandler = useMemo {
         JsNotificationHandler(
@@ -84,7 +92,7 @@ val gameView = FC {
             onGameFinished,
             onPlayerLeft,
             onTurn,
-            onError
+            onError,
         )
     }
 

@@ -29,7 +29,7 @@ private enum class Mode(val prettyString: String) {
 val welcomeView = FC {
     val navigate = useNavigate()
     val (userName, setUserName) = useState(localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY).orEmpty())
-    val (isUserNameValid, setIsUserNameValid) = useState(true)
+    val (isUserNameValid, setIsUserNameValid) = useState(localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY).orEmpty().isNameValid())
     val (createOrJoin, setCreateOrJoin) = useState(Mode.CREATE)
 
     Container {
@@ -49,9 +49,10 @@ val welcomeView = FC {
                     variant = FormControlVariant.outlined
                     value = userName
                     error = !isUserNameValid
+                    helperText = ReactNode("Username should have at least 2 chars and at most 15.").takeIf { !isUserNameValid }
                     onChange = {
                         setUserName(it.targetString)
-                        setIsUserNameValid(userName.isNameValid())
+                        setIsUserNameValid(it.targetString.isNameValid())
                         localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, it.targetString)
                     }
                 }
@@ -90,6 +91,7 @@ val welcomeView = FC {
                 when (createOrJoin) {
                     Mode.CREATE -> createComponent {
                         hostName = userName
+                        isGoButtonDisabled = !isUserNameValid
                         onGoButtonPressed = { lobbyCode, options ->
                             if (isUserNameValid) {
                                 navigate("/$userName/$lobbyCode?c=${options.winCondition}&s=${options.fieldSize}")
@@ -98,6 +100,7 @@ val welcomeView = FC {
                     }
 
                     Mode.JOIN -> joinComponent {
+                        isGoButtonDisabled = !isUserNameValid
                         onGoButtonPressed = { lobbyCode ->
                             if (isUserNameValid) {
                                 navigate("/$userName/$lobbyCode")
@@ -107,7 +110,9 @@ val welcomeView = FC {
 
                     Mode.BROWSE -> browseComponent {
                         onGoButtonPressed = { selectedLobbyCode ->
-                            navigate("/$userName/$selectedLobbyCode")
+                            if (isUserNameValid) {
+                                navigate("/$userName/$selectedLobbyCode")
+                            }
                         }
                     }
                 }
@@ -116,4 +121,4 @@ val welcomeView = FC {
     }
 }
 
-private fun String.isNameValid() = length in 2..15
+private fun String.isNameValid() = length in 2..15 && isNotBlank()

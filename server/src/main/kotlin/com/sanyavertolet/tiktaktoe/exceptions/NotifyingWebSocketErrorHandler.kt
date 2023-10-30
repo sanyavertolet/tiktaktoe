@@ -9,10 +9,9 @@ class NotifyingWebSocketErrorHandler : ErrorHandler<DefaultWebSocketSession> {
     override suspend fun onError(exception: GameException, session: DefaultWebSocketSession) {
         val message = exception.message ?: exception.stackTraceToString()
         logger.warn(message)
+        session.sendError(Notifications.Error(message, true, exception.stackTraceToString()))
         if (exception.isCritical) {
             session.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, message))
-        } else {
-            session.sendError(Notifications.Error(message, false, exception.stackTraceToString()))
         }
     }
 

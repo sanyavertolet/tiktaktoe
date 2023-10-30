@@ -17,10 +17,12 @@ class BrowserWebSocketClient(
 ) : WebSocketClient(Js) {
     private val scope = CoroutineScope(coroutineContext)
 
+    private fun onClose(closeReason: String?) = Unit
+
     private fun startSession(
         requestBuilder: () -> Requests
     ) = scope.launch {
-        startSessionAndRequest(SERVER_URL, notificationHandler::onNotificationReceived, requestBuilder)
+        startSessionAndRequest(SERVER_URL, notificationHandler::onNotificationReceived, requestBuilder, onClose = ::onClose)
     }
 
     fun startSession(options: Options?) = startSession {
