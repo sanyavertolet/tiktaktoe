@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.seconds
 
 fun main() {
-    embeddedServer(CIO, port = 8080, host = "localhost", module = Application::module).start(wait = true)
+    embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
 }
 
 typealias LobbySet = MutableSet<Lobby<DefaultWebSocketSession>>
