@@ -13,14 +13,26 @@ import react.useState
 import web.cssom.rem
 
 external interface CreateComponentProps : Props {
-    var onGoButtonPressed: (Options) -> Unit
+    var onGoButtonPressed: (String, Options) -> Unit
 }
 
 val createComponent: FC<CreateComponentProps> = FC { props ->
+    val (lobbyCode, setLobbyCode) = useState("")
     val (options, setOptions) = useState(Options.default)
     Stack {
         sx { paddingTop = 1.rem }
         spacing = responsive(2)
+
+        TextField {
+            id = "lobby-code"
+            size = Size.small
+            label = ReactNode("Lobby code")
+            variant = FormControlVariant.outlined
+            value = lobbyCode
+            onChange = {
+                setLobbyCode(it.targetString)
+            }
+        }
 
         TextField {
             id = "field-size"
@@ -50,7 +62,7 @@ val createComponent: FC<CreateComponentProps> = FC { props ->
 
         Button {
             variant = ButtonVariant.outlined
-            onClick = { props.onGoButtonPressed(options) }
+            onClick = { props.onGoButtonPressed(lobbyCode, options) }
             +"Go!"
         }
     }

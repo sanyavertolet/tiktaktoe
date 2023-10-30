@@ -1,11 +1,13 @@
 package com.sanyavertolet.tiktaktoe.multiplayer
 
+import com.sanyavertolet.tiktaktoe.LobbyDto
 import com.sanyavertolet.tiktaktoe.exceptions.GameException
 import com.sanyavertolet.tiktaktoe.game.MarkerType
+import com.sanyavertolet.tiktaktoe.game.Options
 import com.sanyavertolet.tiktaktoe.game.Player
 import com.sanyavertolet.tiktaktoe.game.TikTakToeGame
+import com.sanyavertolet.tiktaktoe.lobbies
 import com.sanyavertolet.tiktaktoe.messages.Notifications
-import io.ktor.websocket.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class Lobby<O : Any> (
@@ -53,9 +55,14 @@ class Lobby<O : Any> (
         lobbies.find { it.lobbyCode == lobbyCode }?.let { lobbies.remove(it) }
     }
 
+    fun toDto() = LobbyDto(
+        host.name,
+        Options(boardSize, rowWinCount),
+        lobbyCode,
+    )
+
     companion object {
         val lobbyCounter = AtomicInteger(0)
-        val lobbies: MutableSet<Lobby<DefaultWebSocketSession>> = mutableSetOf()
         private const val DEFAULT_DISCONNECT_MESSAGE = "Lobby was closed as the opponent has left."
     }
 }

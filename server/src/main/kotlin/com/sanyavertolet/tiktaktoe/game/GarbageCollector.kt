@@ -1,8 +1,8 @@
 package com.sanyavertolet.tiktaktoe.game
 
-import com.sanyavertolet.tiktaktoe.game.TikTakToeGame.Companion.games
+import com.sanyavertolet.tiktaktoe.games
+import com.sanyavertolet.tiktaktoe.lobbies
 import com.sanyavertolet.tiktaktoe.multiplayer.Lobby
-import com.sanyavertolet.tiktaktoe.multiplayer.Lobby.Companion.lobbies
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -19,14 +19,18 @@ class GarbageCollector(
 
     private fun <S : Any> Lobby<S>.isActive() = users.all { it.isActive() }
 
-    private fun cleanUpGames() = games.filter { (_, game) -> !game.isActive() }
-        .forEach { (lobbyCode, _) -> games.remove(lobbyCode) }
+    private fun cleanUpGames() {
+        games.filter { (_, game) -> !game.isActive() }
+            .forEach { (lobbyCode, _) -> games.remove(lobbyCode) }
+    }
 
-    private suspend fun cleanUpLobbies() = lobbies.filter { lobby -> !lobby.isActive() }
-        .forEach {
-            it.close()
-            lobbies.remove(it)
-        }
+    private suspend fun cleanUpLobbies() {
+        lobbies.filter { lobby -> !lobby.isActive() }
+            .forEach {
+                it.close()
+                lobbies.remove(it)
+            }
+    }
 
     private suspend fun cleanUp() {
         cleanUpLobbies()

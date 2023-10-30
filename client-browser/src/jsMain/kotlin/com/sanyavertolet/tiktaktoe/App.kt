@@ -12,6 +12,8 @@ import react.create
 import react.router.RouterProvider
 import web.cssom.TextAlign
 
+const val SERVER_URL = BrowserWebSocketClient.URL
+
 val app = FC {
     themeProvider {
         Container {

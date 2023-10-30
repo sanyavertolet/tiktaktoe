@@ -1,6 +1,8 @@
 package com.sanyavertolet.tiktaktoe.views.welcome
 
+import com.sanyavertolet.tiktaktoe.utils.LOCAL_STORAGE_USERNAME_KEY
 import com.sanyavertolet.tiktaktoe.utils.targetString
+import com.sanyavertolet.tiktaktoe.views.welcome.components.browseComponent
 import com.sanyavertolet.tiktaktoe.views.welcome.components.createComponent
 import com.sanyavertolet.tiktaktoe.views.welcome.components.joinComponent
 import mui.material.*
@@ -15,17 +17,18 @@ import web.cssom.JustifyContent
 import web.cssom.Margin
 import web.cssom.rem
 import web.cssom.vh
+import web.storage.localStorage
 
 private enum class Mode(val prettyString: String) {
     CREATE("Create"),
     JOIN("Join"),
+    BROWSE("Browse"),
     ;
 }
 
 val welcomeView = FC {
     val navigate = useNavigate()
-    val (userName, setUserName) = useState("")
-    val (lobbyCode, setLobbyCode) = useState("")
+    val (userName, setUserName) = useState(localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY).orEmpty())
 
     val (createOrJoin, setCreateOrJoin) = useState(Mode.CREATE)
 
@@ -47,17 +50,7 @@ val welcomeView = FC {
                     value = userName
                     onChange = {
                         setUserName(it.targetString)
-                    }
-                }
-
-                TextField {
-                    id = "lobby-code"
-                    size = Size.small
-                    label = ReactNode("Lobby code")
-                    variant = FormControlVariant.outlined
-                    value = lobbyCode
-                    onChange = {
-                        setLobbyCode(it.targetString)
+                        localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, it.targetString)
                     }
                 }
 
@@ -83,18 +76,32 @@ val welcomeView = FC {
                         value = Mode.JOIN
                         +Mode.JOIN.prettyString
                     }
+                    ToggleButton {
+                        value = Mode.BROWSE
+                        +Mode.BROWSE.prettyString
+                    }
                 }
             }
 
-            when (createOrJoin) {
-                Mode.CREATE -> createComponent {
-                    onGoButtonPressed = {
-                        navigate("/$userName/$lobbyCode?c=${it.winCondition}&s=${it.fieldSize}")
+            Box {
+                sx { paddingTop = 2.rem }
+                when (createOrJoin) {
+                    Mode.CREATE -> createComponent {
+                        onGoButtonPressed = { lobbyCode, options ->
+                            navigate("/$userName/$lobbyCode?c=${options.winCondition}&s=${options.fieldSize}")
+                        }
                     }
-                }
-                Mode.JOIN -> joinComponent {
-                    onGoButtonPressed = {
-                        navigate("/$userName/$lobbyCode")
+
+                    Mode.JOIN -> joinComponent {
+                        onGoButtonPressed = { lobbyCode ->
+                            navigate("/$userName/$lobbyCode")
+                        }
+                    }
+
+                    Mode.BROWSE -> browseComponent {
+                        onGoButtonPressed = { selectedLobbyCode ->
+                            navigate("/$userName/$selectedLobbyCode")
+                        }
                     }
                 }
             }

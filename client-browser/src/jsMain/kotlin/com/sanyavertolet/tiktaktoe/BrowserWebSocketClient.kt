@@ -20,7 +20,7 @@ class BrowserWebSocketClient(
     private fun startSession(
         requestBuilder: () -> Requests
     ) = scope.launch {
-        startSessionAndRequest(URL, notificationHandler::onNotificationReceived, requestBuilder)
+        startSessionAndRequest(SERVER_URL, notificationHandler::onNotificationReceived, requestBuilder)
     }
 
     fun startSession(options: Options?) = startSession {
@@ -33,8 +33,9 @@ class BrowserWebSocketClient(
 
     fun sendGameStartRequest() = sendRequest(Requests.StartGame(lobbyCode))
 
+    @Suppress("unused")
     companion object {
-        private const val URL = "kznet.ftp.sh:8080"
-        private const val DEBUG_URL = "localhost:8082"
+        const val URL = "kznet.ftp.sh:8080"
+        const val DEBUG_URL = "localhost:8080"
     }
 }

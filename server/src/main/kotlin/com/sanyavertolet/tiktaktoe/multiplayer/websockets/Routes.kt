@@ -1,5 +1,6 @@
 package com.sanyavertolet.tiktaktoe.multiplayer.websockets
 
+import com.sanyavertolet.tiktaktoe.lobbies
 import com.sanyavertolet.tiktaktoe.messages.Notifications
 import com.sanyavertolet.tiktaktoe.messages.Requests
 import com.sanyavertolet.tiktaktoe.multiplayer.RequestProcessor
@@ -19,8 +20,9 @@ fun Routing.gameRoute(
         for (frame in incoming) {
             val message = frame.asTextOrError() ?: continue
             val messageText = message.readText()
-            webSocketLogger.trace("Receiving $messageText")
+            webSocketLogger.error("Receiving $messageText")
             requestProcessor.onRequest(Json.decodeFromString<Requests>(messageText), this)
+            println("WS: ${lobbies.size}")
         }
     } catch (e: Exception) {
         e.printStackTrace()
