@@ -16,7 +16,6 @@ import react.useState
 import web.cssom.JustifyContent
 import web.cssom.Margin
 import web.cssom.rem
-import web.cssom.vh
 import web.storage.localStorage
 
 private enum class Mode(val prettyString: String) {
@@ -37,7 +36,6 @@ val welcomeView = FC {
         Box {
             sx {
                 paddingTop = 2.rem
-                height = 50.vh
             }
             Stack {
                 spacing = responsive(2)

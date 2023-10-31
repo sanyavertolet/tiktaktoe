@@ -85,6 +85,7 @@ val browseComponent: FC<BrowseComponentProps> = FC { props ->
                                 +lobby.options.winCondition.toString()
                             }
                             TableCell {
+                                align = TableCellAlign.right
                                 Button {
                                     variant = ButtonVariant.outlined
                                     onClick = { props.onGoButtonPressed(lobby.lobbyCode) }

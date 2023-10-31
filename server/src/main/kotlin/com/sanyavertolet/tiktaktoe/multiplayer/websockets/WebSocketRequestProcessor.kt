@@ -31,23 +31,29 @@ class WebSocketRequestProcessor(
         )
     }
 
-    override suspend fun onJoinLobby(request: Requests.JoinLobby, session: DefaultWebSocketSession) {
-        val user = WebSocketUser(request.userName, session)
-        lobbies.find { it.lobbyCode == request.lobbyCode }
-            ?.also { it.connectUser(user) }
-            ?.also { lobby ->
-                lobby.host.sendNotification(
-                    Notifications.PlayerJoined(request.userName, lobby.boardSize, lobby.rowWinCount),
-                )
-                user.sendNotification(
-                    Notifications.PlayerJoined(lobby.host.name, lobby.boardSize, lobby.rowWinCount),
-                )
-            } ?: throw GameException("Lobby [${request.lobbyCode}] was not found.", true)
+    override suspend fun onJoinLobby(request: Requests.JoinLobby, session: DefaultWebSocketSession) = lobbies.find {
+        it.lobbyCode == request.lobbyCode
     }
+        .orGameException("Lobby [${request.lobbyCode}] was not found.", true)
+        .takeIf { it.host.name != request.userName }
+        .orGameException("Nickname ${request.userName} is busy.", true)
+        .let { lobby ->
+            val user = WebSocketUser(request.userName, session)
+            lobby.connectUser(user)
+            lobby to user
+        }
+        .let { (lobby, user) ->
+            lobby.host.sendNotification(
+                Notifications.PlayerJoined(request.userName, lobby.boardSize, lobby.rowWinCount),
+            )
+            user.sendNotification(
+                Notifications.PlayerJoined(lobby.host.name, lobby.boardSize, lobby.rowWinCount),
+            )
+        }
 
     override suspend fun onLeaveLobby(request: Requests.LeaveLobby, session: DefaultWebSocketSession) {
         val lobby = lobbies.find { it.lobbyCode == request.lobbyCode }
-            ?: throw GameException("Could not find lobby with code [${request.lobbyCode}].", true)
+            .orGameException("Could not find lobby with code [${request.lobbyCode}].", true)
         lobby.disconnectUser(request.userName, session)
         lobby.notifyAll(Notifications.PlayerLeft)
         lobbies.remove(lobby)
@@ -57,7 +63,7 @@ class WebSocketRequestProcessor(
     override suspend fun onStartGame(request: Requests.StartGame, session: DefaultWebSocketSession) {
         lobbies.find { it.host.origin == session && it.lobbyCode == request.lobbyCode }
             ?.also { lobby -> games[lobby.lobbyCode] = lobby.createGame().also { game -> game.run() } }
-            ?: throw GameException("Forbidden to create such lobby.", true)
+            .orGameException("Forbidden to create such lobby.", true)
     }
 
     override suspend fun onTurn(request: Requests.Turn, session: DefaultWebSocketSession) {
@@ -74,4 +80,9 @@ class WebSocketRequestProcessor(
                 ?: GarbageCollector.cleanUp(request.lobbyCode)
         } ?: throw GameException("Lobby with code [${request.lobbyCode}] was not found.", true)
     }
+
+    private fun Lobby<DefaultWebSocketSession>?.orGameException(
+        message: String,
+        isCritical: Boolean,
+    ) = this ?: throw GameException(message, isCritical)
 }
