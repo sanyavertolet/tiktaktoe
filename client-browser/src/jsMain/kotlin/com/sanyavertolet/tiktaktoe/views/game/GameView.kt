@@ -68,8 +68,10 @@ val gameView = FC {
     }
 
     val onPlayerLeft: PlayerLeftCallback = {
-        setWinnerUserName(userNameFromUrl)
-        setIsWinnerModalShown(true)
+        markerType?.let {
+            setWinnerUserName(userNameFromUrl)
+            setIsWinnerModalShown(true)
+        } ?: setOpponentName(null)
     }
 
     val onTurn: TurnCallback = { position, userName ->
@@ -82,8 +84,6 @@ val gameView = FC {
     val onError: ErrorCallback = { error, _ ->
         setErrorMessage(error)
     }
-
-    console.log(errorMessage)
 
     val jsNotificationHandler = useMemo {
         JsNotificationHandler(

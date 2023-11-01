@@ -12,38 +12,52 @@ import mui.system.sx
 import react.ChildrenBuilder
 import react.FC
 import react.Props
-import web.cssom.Border
-import web.cssom.LineStyle
+import react.create
+import web.cssom.Display
+import web.cssom.JustifyContent
+import web.cssom.px
 import web.cssom.rem
 
 private fun ChildrenBuilder.renderField(fieldSize: Int, field: FieldType, onClickCallback: (Position) -> Unit) {
     Container {
+        sx {
+            display = Display.flex
+            justifyContent = JustifyContent.center
+        }
         Stack {
-            direction = responsive(StackDirection.row)
+            direction = responsive(StackDirection.column)
+            divider = Divider.create { sx { borderWidth = 1.px } }
             for (i in 0 until fieldSize) {
                 Stack {
-                    direction = responsive(StackDirection.column)
+                    direction = responsive(StackDirection.row)
+                    divider = Divider.create {
+                        sx { borderWidth = 1.px }
+                        orientation = Orientation.vertical
+                        flexItem = true
+                    }
                     for (j in 0 until fieldSize) {
-                        val position = Position(i, j)
-                        val marker = field[Position(i, j)]
-
-                        Button {
-                            variant = ButtonVariant.outlined
-                            sx {
-                                width = 2.rem
-                                height = 2.rem
-                                border = Border(0.01.rem, LineStyle.solid)
-                            }
-                            onClick = { onClickCallback(position) }
-                            when (marker) {
-                                MarkerType.TIC -> Close()
-                                MarkerType.TAC -> RadioButtonUnchecked()
-                                else -> +" "
-                            }
+                        Position(i, j).let {
+                            val marker = field[it]
+                            renderCell(marker) { onClickCallback(it) }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+private fun ChildrenBuilder.renderCell(marker: MarkerType?, onClickCallback: () -> Unit) {
+    Button {
+        sx {
+            width = 4.rem
+            height = 4.rem
+        }
+        onClick = { onClickCallback() }
+        when (marker) {
+            MarkerType.TIC -> Close()
+            MarkerType.TAC -> RadioButtonUnchecked()
+            else -> +" "
         }
     }
 }
