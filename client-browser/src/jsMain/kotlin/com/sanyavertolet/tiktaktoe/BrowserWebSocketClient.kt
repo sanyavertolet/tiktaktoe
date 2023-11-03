@@ -19,6 +19,8 @@ class BrowserWebSocketClient(
 
     private fun onClose(closeReason: String?) = Unit
 
+    fun disconnect() = sendRequest(Requests.LeaveLobby(userName, lobbyCode))
+
     private fun startSession(
         requestBuilder: () -> Requests
     ) = scope.launch {

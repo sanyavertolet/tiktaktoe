@@ -113,6 +113,10 @@ val gameView = FC {
             this.startGame = client::sendGameStartRequest
             this.isHost = optionsFromUrl != null
             this.lobbyCode = lobbyCodeFromUrl
+            this.logout = {
+                client.disconnect()
+                navigate("/", jso { replace = true })
+            }
         }
         else -> gameComponent {
             this.isMyTurn = isMyTurn

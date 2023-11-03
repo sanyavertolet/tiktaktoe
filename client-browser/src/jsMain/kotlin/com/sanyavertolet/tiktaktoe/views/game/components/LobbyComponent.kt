@@ -39,6 +39,7 @@ val lobbyComponent: FC<LobbyComponentProps> = FC { props ->
                 label = Typography.create { +props.lobbyCode }
                 variant = ChipVariant.outlined
                 onClick = {
+                    // TODO: setup https as `clipboard` requires https to function
                     navigator.clipboard.writeText(props.lobbyCode)
                     setIsCopyNotificationShown(true)
                 }
@@ -73,11 +74,23 @@ val lobbyComponent: FC<LobbyComponentProps> = FC { props ->
             +(props.opponentName?.let { "Opponent name: $it" } ?: "Waiting for an opponent...")
         }
 
-        if(props.isHost && props.opponentName != null) {
+        Container {
+            maxWidth = "xs"
+
+            if(props.isHost && props.opponentName != null) {
+                Button {
+                    sx {
+                        marginRight = 2.rem
+                    }
+                    variant = ButtonVariant.outlined
+                    onClick = { props.startGame() }
+                    +"Go!"
+                }
+            }
             Button {
                 variant = ButtonVariant.outlined
-                onClick = { props.startGame() }
-                +"Go!"
+                onClick = { props.logout() }
+                +"Leave"
             }
         }
     }
@@ -90,4 +103,5 @@ external interface LobbyComponentProps : Props {
     var startGame: () -> Unit
     var isHost: Boolean
     var lobbyCode: String
+    var logout: () -> Unit
 }
