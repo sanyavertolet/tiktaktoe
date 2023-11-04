@@ -3,15 +3,11 @@ package com.sanyavertolet.tiktaktoe.views.welcome.components
 import com.sanyavertolet.tiktaktoe.game.Options
 import com.sanyavertolet.tiktaktoe.utils.getMD5
 import com.sanyavertolet.tiktaktoe.utils.targetString
-import com.sanyavertolet.tiktaktoe.utils.useOnce
 import mui.material.*
 import mui.system.responsive
 import mui.system.sx
-import react.FC
-import react.Props
-import react.ReactNode
+import react.*
 import react.dom.onChange
-import react.useState
 import web.cssom.rem
 
 external interface CreateComponentProps : Props {
@@ -24,7 +20,7 @@ val createComponent: FC<CreateComponentProps> = FC { props ->
     val (lobbyCode, setLobbyCode) = useState("")
     val (options, setOptions) = useState(Options.default)
 
-    useOnce {
+    useEffect(props.hostName) {
         setLobbyCode(props.hostName.getMD5(6))
     }
 
